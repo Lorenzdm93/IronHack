@@ -1,0 +1,7 @@
+SELECT * FROM actor;
+SELECT title FROM film;
+SELECT language_id as language FROM film;
+SELECT last_name FROM staff;
+SELECT count(*) FROM staff;
+SELECT count(*) as TotalStores FROM store;
+SELECT first_name FROM staff;

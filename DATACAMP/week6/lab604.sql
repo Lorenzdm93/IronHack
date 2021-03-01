@@ -1,0 +1,107 @@
+use sakila;
+
+select * from customer;
+select * from rental;
+
+/* Select the first name, last name, and email address of all the 
+customers who have rented a movie. */
+
+select c.first_name, c.last_name, c.email, r.rental_id from customer as c
+inner join rental as r
+on c.customer_id = r.customer_id;
+
+/* What is the average payment made by each customer (display the customer id, 
+customer name (concatenated), and the average payment made). */
+
+select * from payment;
+
+select 
+	c.customer_id, 
+	concat(c.first_name, ' ', c.last_name) as concatName, 
+	avg(p.amount) as Avg 
+from customer as c
+join payment as p
+on c.customer_id = p.customer_id
+group by c.customer_id;
+
+/* Select the name and email address of all the customers who 
+have rented the "Action" movies.
+
+-Write the query using multiple join statements
+-Write the query using sub queries with multiple WHERE clause and IN condition
+-Verify if the above two queries produce the same results or not */
+
+select * from film_category;
+select * from category;
+select * from rental;
+select * from payment;
+select * from film;
+select * from customer;
+select * from inventory;
+
+-- example with subquery (only retrieves a few names, double check)
+select customer_id, first_name, last_name, email 
+from customer 
+where customer_id in  
+	(select rental_id from rental 
+	where inventory_id in 
+		(select inventory_id from inventory as i
+		where i.film_id in
+			(select fc.film_id 
+			from category as cat 
+			join film_category as fc
+			on cat.category_id = fc.category_id
+			where name = 'Action')))
+order by customer_id;
+
+ -- Marcus version
+select CONCAT(last_name,' ',first_name)  as Name, email as email
+from customer
+where customer_id in (
+	select customer_id 
+	from rental
+	where inventory_id in (
+		select inventory_id
+		from inventory
+		where film_id in (
+			select film_id
+			from film_category
+			where category_id in (
+				select category_id
+				from category
+				where name = 'Action'))))
+group by customer_id
+order by Name;        
+
+-- example with join
+select c.customer_id, c.first_name, c.last_name, c.email 
+from
+customer as c
+join rental as r
+on c.customer_id = r.customer_id
+join inventory as i
+on i.inventory_id = r.inventory_id
+join film_category as fc
+on fc.film_id = i.film_id
+join category as cat
+on cat.category_id = fc.category_id
+where cat.name = 'Action'
+group by customer_id
+order by customer_id;
+
+/* Use the case statement to create a new column 
+classifying existing columns as either low or high value 
+transactions based on the amount of payment. 
+If the amount is between 0 and 2, label should be low 
+and if the amount is between 2 and 4, 
+the label should be medium, 
+and if it is more than 4, then it should be high */
+
+select * from payment;
+
+select *, 
+(case when amount < 2 Then 'Low' 
+when amount > 4 Then 'High' 
+ELSE 'medium' 
+end) as Payment_class
+from payment;
